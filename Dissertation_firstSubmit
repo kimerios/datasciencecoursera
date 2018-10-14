@@ -1,0 +1,36 @@
+# Reading the Practical Machine Learning Dissertation assignment, downloaded the data and read the reference resources from the 
+# http://groupware.les.inf.puc-rio.br/har   site. I have no prior understanding or background of the subject matter and therefore 
+# I start with 0 knowledge on how to approach this assignment. After some thought i decided on the approach taken which is to 
+#let the data speak for themselves and make no a priori assumptions  of what the relationship between the variables in the dataset are.
+
+#Given the question at hand is to predict the various values of the  classe variable (A,B,C,D,E) my first thought was to use a 
+#classification algorithm. Also given there is a training set and test set then this is a supervised learning algorithm.
+#I could start off by trying some form of logistic regression and bandle the (B,C,D,E) values of the classe variable as the  "incorrectly"
+#done exercises vs class value (A) the "correct" way to perform the exercices. However this logistic regression would assume some 
+#functional form between the variables, which given I have no theoretical background for this research field, I decided to not use a 
+#regression model. Instead I opted for a Random Forest classification and Tree classification algorithms as this offer the flexibility 
+#that no functional form is required and the algorithm tries to find the optimum split/classification given the data at hand.
+
+#After loading the dataset and run a first iteration with the intention to measure what the prediction error was for the training set 
+#i bumped into a number of data related problems.
+
+options(stringsAsFactors = FALSE)
+
+##get workingDir
+Courserapath<- getwd() 
+
+##import training data to R
+Filepath = paste(Courserapath,"/Desktop/Nik/Coursera/Machine Learning DScientist specialisation/Week4 Project/Dissertation/pml-training.csv",sep="")
+DissertationData<- read.csv(file = Filepath,header = T,na.strings =c("#DIV/0!","NA"))
+dim(DissertationData)
+
+
+## Train the model with Tree classification
+modFit<-train(classe ~ ., method="rpart",data = DissertationData,na.rm=TRUE)
+print(modFit$finalModel) 
+
+
+## Train the model with Random Forest classification
+modFit<-train(classe ~ ., method="rf",data = DissertationData,na.rm=TRUE)
+print(modFit$finalModel) 
+
