@@ -6,6 +6,7 @@
 # * Environment set up (libs and functions used in the ensuing of the code)
 # * Data preparation. (import data, selection of variables)
 # * Model selection logic (theoretical background underpinning the classification algorithm.
+# * Model results
 
 #Given the question at hand is to predict the various values of the  'classe' variable (A,B,C,D,E) my first thought was to use a 
 #classification algorithm. Also given there is a training set and test set then this is a supervised learning algorithm.
