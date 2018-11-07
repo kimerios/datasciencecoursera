@@ -3,6 +3,7 @@
 # I start with 0 knowledge on how to approach this assignment. After some thought i decided on the approach taken which is to 
 #let the data speak for themselves and make no a priori assumptions  of what the relationship between the variables in the dataset are.
 
+The ensuing of the document will be structured in the following. 
 # * Environment set up (libs and functions used in the ensuing of the code)
 # * Data preparation. (import data, selection of variables)
 # * Model selection logic (theoretical background underpinning the classification algorithm.
