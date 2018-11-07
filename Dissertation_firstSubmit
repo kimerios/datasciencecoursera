@@ -3,7 +3,11 @@
 # I start with 0 knowledge on how to approach this assignment. After some thought i decided on the approach taken which is to 
 #let the data speak for themselves and make no a priori assumptions  of what the relationship between the variables in the dataset are.
 
-#Given the question at hand is to predict the various values of the  classe variable (A,B,C,D,E) my first thought was to use a 
+# * Environment set up (libs and functions used in the ensuing of the code)
+# * Data preparation. (import data, selection of variables)
+# * Model selection logic (theoretical background underpinning the classification algorithm.
+
+#Given the question at hand is to predict the various values of the  'classe' variable (A,B,C,D,E) my first thought was to use a 
 #classification algorithm. Also given there is a training set and test set then this is a supervised learning algorithm.
 #I could start off by trying some form of logistic regression and bandle the (B,C,D,E) values of the classe variable as the  "incorrectly"
 #done exercises vs class value (A) the "correct" way to perform the exercices. However this logistic regression would assume some 
