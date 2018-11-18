@@ -1,13 +1,130 @@
 # Reading the Practical Machine Learning Dissertation assignment, downloaded the data and read the reference resources from the 
 # http://groupware.les.inf.puc-rio.br/har   site. I have no prior understanding or background of the subject matter and therefore 
 # I start with 0 knowledge on how to approach this assignment. After some thought i decided on the approach taken which is to 
-#let the data speak for themselves and make no a priori assumptions  of what the relationship between the variables in the dataset are.
+# let the data speak for themselves and make no a priori assumptions  of what the relationship between the variables in the dataset are.
 
-The ensuing of the document will be structured in the following. 
-# * Environment set up (libs and functions used in the ensuing of the code)
-# * Data preparation. (import data, selection of variables)
-# * Model selection logic (theoretical background underpinning the classification algorithm.
-# * Model results
+# The ensuing of the document will be structured as follows:
+
+# 1. Environment set up (libs and functions used in the ensuing of the code)
+# 2. Data preparation. (import data, selection of variables)
+# 3. Model selection logic (theoretical background underpinning the classification algorithm.
+# 4. Model results
+
+
+# 1.Environment set up 
+
+## setting this global option so I wont repeat in my code later..
+options(stringsAsFactors = FALSE)
+
+## Timer functions
+## used in assessing model run time.. At times exceeded the 12hours runs with no results..
+
+tic <- function(gcFirst = TRUE, type=c("elapsed", "user.self", "sys.self"))
+{
+  type <- match.arg(type)
+  assign(".type", type, envir=baseenv())
+  if(gcFirst) gc(FALSE)
+  tic <- proc.time()[type]         
+  assign(".tic", tic, envir=baseenv())
+  invisible(tic)
+}
+
+toc <- function()
+{
+  type <- get(".type", envir=baseenv())
+  toc <- proc.time()[type]
+  tic <- get(".tic", envir=baseenv())
+  print(toc - tic)
+  invisible(toc)
+}
+
+## handy '&' function 
+function(x,y) {
+  if(is.character(x) || is.character(y)) {
+    return(paste(x , y, sep=""))
+  } else {
+    .Primitive("+")(x,y)
+  }
+}
+
+### import the necessary libs for algo run or testing purposes
+#### using the below caret version as instructed in Coursersa week 4 forums)
+devtools::install_github('topepo/caret/pkg/caret')
+###
+install.packages("AppliedPredictiveModeling")
+install.packages("quantregForest")
+library(AppliedPredictiveModeling)
+library(caret)
+library(randomForest) 
+library(quantregForest)
+library(lattice)
+library(ggplot2)
+
+##get workingDir
+Courserapath<- getwd() 
+
+
+# 2. Data preparation. (import data, selection of variables)
+# ..most of my time was spent on this part of the dissertation project..
+
+##import training data to R
+Filepath = paste(Courserapath,"/Desktop/Nik/Coursera/Machine Learning DScientist specialisation/Week4 Project/Dissertation/pml-training.csv",sep="")
+DissertationData<- read.csv(file = Filepath,header = T,na.strings =c("#DIV/0!","NA"),skipNul = T)
+dim(DissertationData)
+
+
+##import testing data to R
+Filepath = paste(Courserapath,"/Desktop/Nik/Coursera/Machine Learning DScientist specialisation/Week4 Project/Dissertation/pml-testing.csv",sep="")
+DissertationTestData<- read.csv(file = Filepath,header = T,na.strings =c("#DIV/0!","NA"),skipNul = T)
+dim(DissertationTestData)
+
+##quick data exploration
+str(DissertationData)
+head(DissertationData,3)
+
+str(DissertationTestData)
+head(DissertationTestData,3)
+
+## data/attribute selection step 1. Excluding variable with only Div!0 errors records
+CleanedDissertationData<-DissertationData[,-c(14,22,89,92,127,130)]
+
+## data/attribute selection step 2. Excluding only NA variables as it can be assumed they dont contain any useful information
+CleanedDissertationData<-DissertationData[,-c(18,19,21,24,25,27,28,29,30,31,33,34,35,36,50,51,52,53,54,55,56,58,59,75,76,77,78,79,80,81,82,83,93,94,96,97,99,100,103,104,105,106,107,108,109,110,111,112,131,132,134,135,137,138,141,142,143,144,145,146,147,148,149,150)]
+
+##  data/attribute selection step 3. Excluding those with #Div/0! error.
+CleanedDissertationData<-DissertationData[,-c(12,13,14,15,16,17,20,23,26,69,70,71,72,73,74,87,88,89,90,91,92,95,98,101,125,126,127,128,129,130,133,136,139)]
+
+##  data/attribute selection step 4. Exclude info(variables) deemed not relevant to the analysis(non quantitative-descriptive)
+##eg. raw_timestamp_part_1 and record numbers among others
+CleanedDissertationData<-DissertationData[,-c(1,3,4,5)]
+
+# For the remaining attributes conducted a data analysis to establish stale/attributes with no variability
+# stale(across classe)  which are deemed to not convey any meaningfull information to this classification problem
+# also non-variable attributes cause the algo to fail. Very important finding.
+
+
+#reminder of attributes (excluding those in step 1 to 4) were  used to come up with a new data set (SecondItteration)
+# which will be used to  test for staleness
+rangeresults<-as.data.frame(sapply(SecondItteration,range))
+
+piliko<-which(rangeresults[1,]==rangeresults[2,])
+piliko
+
+############################################################################################################
+###below code snippet was also used to visualise the results of data dispersion(range) for numeric fields
+for (i in 1:dim(trainingData)[2]) {
+  x[i,1]<-  class(trainingData[[i]])
+}
+readNumericcolumns<-which(x!="factor")
+
+onlyNumericTrainingData<- trainingData[,readNumericcolumns]
+sapply(onlyNumericTrainingData, range) ## check range across all data.
+dim(sapply(onlyNumericTrainingData, range)) ##quick dimension check
+
+############################################################################################################
+
+
+'variable selection logic/analysis'
 
 #Given the question at hand is to predict the various values of the  'classe' variable (A,B,C,D,E) my first thought was to use a 
 #classification algorithm. Also given there is a training set and test set then this is a supervised learning algorithm.
