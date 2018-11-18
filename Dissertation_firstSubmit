@@ -1,7 +1,7 @@
 # Reading the Practical Machine Learning Dissertation assignment, downloaded the data and read the reference resources from the 
 # http://groupware.les.inf.puc-rio.br/har   site. I have no prior understanding or background of the subject matter and therefore 
-# I start with 0 knowledge on how to approach this assignment. After some thought i decided on the approach taken which is to 
-# let the data speak for themselves and make no a priori assumptions  of what the relationship between the variables in the dataset are.
+# I start with 0 knowledge on how to approach this assignment. After some thought and data crunching i decided on the approach taken which is to 
+# let the data speak for themselves and make no a priori assumptions  of what the relationship between the variables in the dataset is.
 
 # The ensuing of the document will be structured as follows:
 
@@ -128,24 +128,47 @@ dim(sapply(onlyNumericTrainingData, range)) ##quick dimension check
 
 #Given the question at hand is to predict the various values of the  'classe' variable (A,B,C,D,E) my first thought was to use a 
 #classification algorithm. Also given there is a training set and test set then this is a supervised learning algorithm.
-#I could start off by trying some form of logistic regression and bandle the (B,C,D,E) values of the classe variable as the  "incorrectly"
+#I  started off by trying a simple form of logistic regression and bandled the (B,C,D,E) values of the classe variable as the  "incorrectly"
 #done exercises vs class value (A) the "correct" way to perform the exercices. However this logistic regression would assume some 
 #functional form between the variables, which given I have no theoretical background for this research field, I decided to not use a 
-#regression model. Instead I opted for a Random Forest classification and Tree classification algorithms as this offer the flexibility 
-#that no functional form is required and the algorithm tries to find the optimum split/classification given the data at hand.
+#regression model. Instead I opted for a Random Forest classification and Tree classification algorithms as this approach offers the 
+flexibility 
+#that no functional form is required to be known and the algorithm tries to find the optimum split/classification given the data at hand.
 
-#After loading the dataset and run a first iteration with the intention to measure what the prediction error was for the training set 
-#i bumped into a number of data related problems.
+#After loading the dataset and run a first iteration with the intention to measure what the model error was for the testing/training set 
+#i bumped into a number of data related problems which determined the methodology approach taken.
+i) dimensionality.. 
+250 variables are a lot of variables to run in one go for a 250x20k dataset. PCA, a common method to address the dimensionality
+problem , was not favored as I have no theoretical background to establish if data are 
+linearly/non linearly related or in general if a  parametric approach should be used. Therefore despite the fact a dimensionality 
+reduction was highly desirable
+(Data consist of 250 variables which not all of the 250 are expected to be of statistical significance) I have not pursued this method 
+so I will avoid the risk of making a 
+theoritical or  parametric assumption  about the data structure. -Perhaps an expert in the field of sports science/
+could have advised otherwise.
 
-options(stringsAsFactors = FALSE)
+ii) missing data/erroneous data..
+These are the variables with NA's or #Div/0.  My first thought was  to employ some technique to impute or infer
+the missing data. Substitution or Interpolation methods (like KNN) could have been employed but again given I could not provide
+any theoretical justification I chose not to apply any of these. I must admit i had the luxury to have a wealth of other variables with rich data 
+so I decided to rely on these and attempt to build the model around them and of course  compare the end results and hopefully my model accuracy 
+would be good enough to predict the classe variable of the testing set.
 
-##get workingDir
-Courserapath<- getwd() 
 
-##import training data to R
-Filepath = paste(Courserapath,"/Desktop/Nik/Coursera/Machine Learning DScientist specialisation/Week4 Project/Dissertation/pml-training.csv",sep="")
-DissertationData<- read.csv(file = Filepath,header = T,na.strings =c("#DIV/0!","NA"))
-dim(DissertationData)
+iii) selection of variables.
+Variables selection criterion was based on completeness of information(no missing values or values 
+that cannot be used for analysis) and variability of information(rich in information as classification problem was not a binary exercise but rather a group of possible outcomes)
+In addition loss of or reduced interpretability is not a concern here given the topic/question 
+of this Dissertation and also the nature of the classification problem. End objective of the 
+dissertation assignment is to correctly predict the test set and produce a workable algorithm that can 
+classify any new test data.
+
+c) Given  points i,ii,iii in the data preparation stage, I therefore choce to select a non parametric approach to solve this problem. 
+Naturally I was drawn to Random Forest and decision trees as my first best guess for answering the dissertation classification task.
+My theoretical background was in favor of Random Forest as they are superior to decision trees -random forest addresses better the overfitting problem-
+but wanted to start clean and experiment with both algorithms.
+
+
 
 
 ## Train the model with Tree classification
