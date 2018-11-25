@@ -1,0 +1,262 @@
+# Reading the Practical Machine Learning Dissertation assignment, downloaded the data and read the reference resources from the 
+# http://groupware.les.inf.puc-rio.br/har   site. I have no prior understanding or background of the subject matter and therefore 
+# I start with 0 knowledge on how to approach this assignment. After some thought and data crunching i decided on the approach taken which is to 
+# let the data speak for themselves and make no a priori assumptions  of what the relationship between the variables in the dataset is.
+
+# The ensuing of the document will be structured as follows:
+
+# 1. Environment set up (libs and functions used in the ensuing of the code)
+# 2. Data preparation. (import data, selection of variables)
+# 3. Model selection logic (theoretical background underpinning the classification algorithm.
+# 4. Model results
+
+
+# 1.Environment set up 
+
+## setting this global option so I wont repeat in my code later..
+options(stringsAsFactors = FALSE)
+
+## Timer functions
+## used in assessing model run time.. At times exceeded the 12hours runs with no results..
+
+tic <- function(gcFirst = TRUE, type=c("elapsed", "user.self", "sys.self"))
+{
+  type <- match.arg(type)
+  assign(".type", type, envir=baseenv())
+  if(gcFirst) gc(FALSE)
+  tic <- proc.time()[type]         
+  assign(".tic", tic, envir=baseenv())
+  invisible(tic)
+}
+
+toc <- function()
+{
+  type <- get(".type", envir=baseenv())
+  toc <- proc.time()[type]
+  tic <- get(".tic", envir=baseenv())
+  print(toc - tic)
+  invisible(toc)
+}
+
+## handy '&' function 
+function(x,y) {
+  if(is.character(x) || is.character(y)) {
+    return(paste(x , y, sep=""))
+  } else {
+    .Primitive("+")(x,y)
+  }
+}
+
+### import the necessary libs for algo run or testing purposes
+#### using the below caret version as instructed in Coursersa week 4 forums)
+devtools::install_github('topepo/caret/pkg/caret')
+###
+install.packages("AppliedPredictiveModeling")
+install.packages("quantregForest")
+library(AppliedPredictiveModeling)
+library(caret)
+library(randomForest) 
+library(quantregForest)
+library(lattice)
+library(ggplot2)
+
+##get workingDir
+Courserapath<- getwd() 
+
+
+# 2. Data preparation. (import data, selection of variables)
+# ..most of my time was spent on this part of the dissertation project..
+
+##import training data to R
+Filepath = paste(Courserapath,"/Desktop/Nik/Coursera/Machine Learning DScientist specialisation/Week4 Project/Dissertation/pml-training.csv",sep="")
+DissertationData<- read.csv(file = Filepath,header = T,na.strings =c("#DIV/0!","NA"),skipNul = T)
+dim(DissertationData)
+
+
+##import testing data to R
+Filepath = paste(Courserapath,"/Desktop/Nik/Coursera/Machine Learning DScientist specialisation/Week4 Project/Dissertation/pml-testing.csv",sep="")
+DissertationTestData<- read.csv(file = Filepath,header = T,na.strings =c("#DIV/0!","NA"),skipNul = T)
+dim(DissertationTestData)
+
+##quick data exploration
+str(DissertationData)
+head(DissertationData,3)
+
+str(DissertationTestData)
+head(DissertationTestData,3)
+
+
+
+############################################################################################################
+
+
+#'variable selection logic/analysis'
+
+#Given the question at hand is to predict the various values of the  'classe' variable (A,B,C,D,E) my first thought was to use a 
+#classification algorithm. Also given there is a training set and test set then this is a supervised learning algorithm.
+#I  started off by trying a simple form of logistic regression and bandled the (B,C,D,E) values of the classe variable as the  "incorrectly"
+#done exercises vs class value (A) the "correct" way to perform the exercices. However this logistic regression would assume some 
+#functional form between the variables, which given I have no theoretical background for this research field, I decided to not use a 
+#regression model. Instead I opted for a Random Forest classification and Tree classification algorithms as this approach offers the 
+#flexibility that no functional form is required to be known and the algorithm tries to find the optimum split/classification 
+#given the data at hand.
+
+#After loading the dataset and run a first iteration with the intention to measure what the model error was for the testing/training set 
+#i bumped into a number of data related problems which determined the methodology approach taken.
+#i) dimensionality.. 
+#250 variables are a lot of variables to run in one go for a 250x20k dataset. PCA, a common method to address the dimensionality
+#problem , was not favored as I have no theoretical background to establish if data are 
+#linearly/non linearly related or in general if a  parametric approach should be used. Therefore despite the fact a dimensionality 
+#reduction was highly desirable
+#(Data consist of 250 variables which not all of the 250 are expected to be of statistical significance) I have not pursued this method 
+#so I will avoid the risk of making a 
+#theoritical or  parametric assumption  about the data structure. -Perhaps an expert in the field of sports science/
+#could have advised otherwise.
+
+#ii) missing data/erroneous data..
+#These are the variables with NA's or #Div/0.  My first thought was  to employ some technique to impute or infer
+#the missing data. Substitution or Interpolation methods (like KNN) could have been employed but again given I could not provide
+#any theoretical justification I chose not to apply any of these. I must admit i had the luxury to have a wealth of other variables with rich data 
+#so I decided to rely on these and attempt to build the model around them and of course  compare the end results and hopefully my model accuracy 
+#would be good enough to predict the classe variable of the testing set.
+
+
+#iii) selection of variables.
+#Variables selection criterion was based on completeness of information(no missing values or values 
+#that cannot be used for analysis) and variability of information(rich in information as classification problem was not a binary exercise but rather a group of possible outcomes)
+#Model dimensions after all "noise" was removed were: 58x19622
+#In addition loss of or reduced interpretability is not a concern here given the topic/question 
+#of this Dissertation and also the nature of the classification problem. End objective of the 
+#dissertation assignment is to correctly predict the test set and produce a workable algorithm that can 
+#classify any new test data.
+
+################################################################################################
+###The below code snippet was used as a quick way to detect stale variables
+### conducting a data analysis to establish stale/attributes with no variability
+### stale(across classe) or no variable attributes are deemed to not convey any meaningfull information to this classification problem
+### also non variable attribute cause the algo to fail.
+# rangeresults<-as.data.frame(sapply(SecondItteration,range))
+
+# piliko<-which(rangeresults[1,]==rangeresults[2,])
+# piliko
+################################################################################################
+
+
+
+
+
+
+# now I put all aforementioned points into breakable step by step data import into the CleanedDissertationData DF. 
+# This DF will be eventually used by the model
+
+## data/attribute selection step 1. Excluding variable with only Div!0 errors records
+CleanedDissertationData<-DissertationData[,-c(14,22,89,92,127,130)]
+
+## data/attribute selection step 2. Excluding only NA variables as it can be assumed they dont contain any useful information
+CleanedDissertationData<-DissertationData[,-c(18,19,21,24,25,27,28,29,30,31,33,34,35,36,50,51,52,53,54,55,56,58,59,75,76,77,78,79,80,81,82,83,93,94,96,97,99,100,103,104,105,106,107,108,109,110,111,112,131,132,134,135,137,138,141,142,143,144,145,146,147,148,149,150)]
+
+##  data/attribute selection step 3. Excluding those with #Div/0! error.
+CleanedDissertationData<-DissertationData[,-c(12,13,14,15,16,17,20,23,26,69,70,71,72,73,74,87,88,89,90,91,92,95,98,101,125,126,127,128,129,130,133,136,139)]
+
+##  data/attribute selection step 4. Exclude info(variables) deemed not relevant to the analysis(non quantitative-descriptive)
+##eg. raw_timestamp_part_1 and record numbers among others
+CleanedDissertationData<-DissertationData[,-c(1,3,4,5)]
+
+### all in one  (from step 1 to 4 above) cleaned DATA set  ###
+CleanedDissertationData<-DissertationData[,-c(1,3,4,5,14,22,89,92,127,130,18,19,21,24,25,27,28,29,30,31,33,34,35,36,50,51,52,53,54,55,56,58,59,75,76,77,78,79,80,81,82,83,93,94,96,97,99,100,103,104,105,106,107,108,109,110,111,112,131,132,134,135,137,138,141,142,143,144,145,146,147,148,149,150,12,13,15,16,17,20,23,26,69,70,71,72,73,74,87,88,90,91,95,98,101,125,126,128,129,133,136,139,1,3,4,5)]
+dim(CleanedDissertationData)
+
+CleanedDissertationData<-as.data.frame(CleanedDissertationData,na.rm=TRUE)
+#unique(CleanedDissertationData$classe)
+
+
+
+### all in one  (from step 1 to 4 above) cleaned TEST set  ###
+CleanedDissertationTestData<-DissertationTestData[,-c(1,3,4,5,14,22,89,92,127,130,18,19,21,24,25,27,28,29,30,31,33,34,35,36,50,51,52,53,54,55,56,58,59,75,76,77,78,79,80,81,82,83,93,94,96,97,99,100,103,104,105,106,107,108,109,110,111,112,131,132,134,135,137,138,141,142,143,144,145,146,147,148,149,150,12,13,15,16,17,20,23,26,69,70,71,72,73,74,87,88,90,91,95,98,101,125,126,128,129,133,136,139,1,3,4,5)]
+dim(CleanedDissertationTestData)
+
+
+# For the remaining attributes conducted a further data analysis to establish stale/attributes with no variability
+# stale(across classe)  which are deemed to not convey any meaningfull information to this classification problem
+# also non-variable attributes cause the algo to fail. Very important finding.
+
+############################################################################################################
+###reminder of attributes (excluding those in step 1 to 4 above) were  used to come up with a new data set (SecondItteration)
+### which have been used  offline to  test for staleness
+##  rangeresults<-as.data.frame(sapply(SecondItteration,range))
+
+## piliko<-which(rangeresults[1,]==rangeresults[2,])
+## piliko
+
+
+###below code snippet was also used to visualise the results of data dispersion(range) for numeric fields
+##  for (i in 1:dim(trainingData)[2]) {
+##   x[i,1]<-  class(trainingData[[i]])
+##   }
+##  readNumericcolumns<-which(x!="factor")
+
+## onlyNumericTrainingData<- trainingData[,readNumericcolumns]
+## sapply(onlyNumericTrainingData, range) ## check range across all data.
+## dim(sapply(onlyNumericTrainingData, range)) ##quick dimension check
+
+
+# 3. Model selection logic (theoretical background underpinning the classification algorithm)
+
+### Given the data preparation stage, I therefore chose to select a non parametric approach to solve this Dissertation problem. 
+### Naturally I was drawn to Random Forest and decision trees as my first best guess for answering the dissertation classification task.
+### My theoretical background was in favor of Random Forest as they are superior to decision trees -random forest addresses better the overfitting problem-
+### but wanted to start clean and experiment with both algorithms.
+
+## set the seed for algo reproducability
+set.seed(251);
+
+## Train the model with Random Forest classification
+modFit<-train(classe ~ roll_belt+pitch_belt+yaw_belt+total_accel_belt+stddev_pitch_belt+gyros_belt_x+gyros_belt_y+gyros_belt_z+
+                accel_belt_x+accel_belt_y+accel_belt_z+magnet_belt_x+magnet_belt_y+magnet_belt_z+roll_arm+pitch_arm+yaw_arm+total_accel_arm, method="rf",data = CleanedDissertationData,na.rm=TRUE,na.action = na.roughfix)
+print(modFit$finalModel)
+
+
+## Train the model with Decision Tree classification
+modFit<-train(classe ~ roll_belt+pitch_belt+yaw_belt+total_accel_belt+stddev_pitch_belt+gyros_belt_x+gyros_belt_y+gyros_belt_z+
+                accel_belt_x+accel_belt_y+accel_belt_z+magnet_belt_x+magnet_belt_y+magnet_belt_z+roll_arm+pitch_arm+yaw_arm+total_accel_arm, method="rpart",data = CleanedDissertationData,na.rm=TRUE,na.action = na.roughfix)
+print(modFit$finalModel)
+
+## plotting the final model depends on your pixel or laptop def.. Doesnt work on my laptop
+## but at my office pc it works relatively fine
+plot(modFit$finalModel)
+
+##confusion Matrix..
+## the confusion Matrix results look very promising with the highest classification error for classe:C (~5%)
+## and the lowest for classe:E(<1%) and an average error of 2%
+## Please see confusion matrix results below
+
+## Confusion matrix:
+##      A    B    C    D    E class.error
+## A 5492   31   30   17   10 0.015770609
+## B   49 3693   45    8    2 0.027390045
+## C   52   86 3235   47    2 0.054646406
+## D   17    4   33 3150   12 0.020522388
+## E   13    4    6    6 3578 0.008039922
+
+
+## Actually the OOB error is estimated to be 2.42%  which for a data set of 20k (rows) by 160(columns) is pretty good I'd say. 
+
+
+# 4. Model Results
+
+## And finally the moment of Truth! 
+## Using the Training set and model algo train on the data for prediction. 
+## We used the "Cleaned" Test Data set (excluded variable(8)/"stddev_pitch_belt" due to missing values  
+answer<-predict(modFit,CleanedDissertationTestData[,-c(8)])
+answer
+
+## Model Evaluation
+
+# The model Prediction was as succesfull as the OOB error implied from the training set. 
+# The author managed to get a 100% pass rate in the test Quiz where all "classe" classification was spot on. 
+# This was only to be expected given the low OOB error & the relative small number of test cases in the Quiz.
+# Nevertheless it proved the point that the effort put into this dissertation has fruitful and succesful results.
+
+# Thank you for reading and for your peer review time and effort .
+# Nik
+
