@@ -207,6 +207,8 @@ dim(CleanedDissertationTestData)
 ### My theoretical background was in favor of Random Forest as they are superior to decision trees -random forest addresses better the overfitting problem-
 ### but wanted to start clean and experiment with both algorithms.
 
+## set the seed for algo reproducability
+set.seed(251);
 
 ## Train the model with Random Forest classification
 modFit<-train(classe ~ roll_belt+pitch_belt+yaw_belt+total_accel_belt+stddev_pitch_belt+gyros_belt_x+gyros_belt_y+gyros_belt_z+
@@ -217,5 +219,26 @@ print(modFit$finalModel)
 ## Train the model with Decision Tree classification
 modFit<-train(classe ~ roll_belt+pitch_belt+yaw_belt+total_accel_belt+stddev_pitch_belt+gyros_belt_x+gyros_belt_y+gyros_belt_z+
                 accel_belt_x+accel_belt_y+accel_belt_z+magnet_belt_x+magnet_belt_y+magnet_belt_z+roll_arm+pitch_arm+yaw_arm+total_accel_arm, method="rpart",data = CleanedDissertationData,na.rm=TRUE,na.action = na.roughfix)
-print(modFit$finalModel) # above run in ... seconds...actually more than 10 minutes and counting.
+print(modFit$finalModel) 
+
+##confusion Matrix..
+##OOB error
+
+# 4. Model Results
+
+## And finally the moment of Truth! 
+## Using the Training set and model algo train on the data for prediction. 
+## We used the "Cleaned" Test Data set (excluded variable(8)/"stddev_pitch_belt" due to missing values  
+answer<-predict(modFit,CleanedDissertationTestData[,-c(8)])
+answer
+
+## Model Evaluation
+
+# The model Prediction was as succesfull as the OOB error implied from the training set. 
+# The author managed to get a 100% pass rate in the test Quiz where all "classe" classification was spot on. 
+# This was only to be expected given the low OOB error & the relative small number of test cases in the Quiz.
+# Nevertheless it proved the point that the effort put into this dissertation has fruitful and succesful results.
+
+# Thank you for reading and for your peer review time and effort .
+# Nik
 
