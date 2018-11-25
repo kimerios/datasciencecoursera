@@ -219,10 +219,28 @@ print(modFit$finalModel)
 ## Train the model with Decision Tree classification
 modFit<-train(classe ~ roll_belt+pitch_belt+yaw_belt+total_accel_belt+stddev_pitch_belt+gyros_belt_x+gyros_belt_y+gyros_belt_z+
                 accel_belt_x+accel_belt_y+accel_belt_z+magnet_belt_x+magnet_belt_y+magnet_belt_z+roll_arm+pitch_arm+yaw_arm+total_accel_arm, method="rpart",data = CleanedDissertationData,na.rm=TRUE,na.action = na.roughfix)
-print(modFit$finalModel) 
+print(modFit$finalModel)
+
+## plotting the final model depends on your pixel or laptop def.. Doesnt work on my laptop
+## but at my office pc it works relatively fine
+plot(modFit$finalModel)
 
 ##confusion Matrix..
-##OOB error
+## the confusion Matrix results look very promising with the highest classification error for classe:C (~5%)
+## and the lowest for classe:E(<1%) and an average error of 2%
+## Please see confusion matrix results below
+
+## Confusion matrix:
+##      A    B    C    D    E class.error
+## A 5492   31   30   17   10 0.015770609
+## B   49 3693   45    8    2 0.027390045
+## C   52   86 3235   47    2 0.054646406
+## D   17    4   33 3150   12 0.020522388
+## E   13    4    6    6 3578 0.008039922
+
+
+## Actually the OOB error is estimated to be 2.42%  which for a data set of 20k (rows) by 160(columns) is pretty good I'd say. 
+
 
 # 4. Model Results
 
